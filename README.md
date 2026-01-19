@@ -1,2 +1,1 @@
-# music-training-app
-Music Training App
+Music training app for metronome and changing chords randomly to train your ability to change chords on any instrument
