@@ -46,7 +46,8 @@ class MainActivity : ComponentActivity() {
 
         // Initialise metronome tick player
         soundPool = SoundPool.Builder().setMaxStreams(1).build()
-        val tickSound = soundPool.load(this, R.raw.tick, 1)
+        val tick1Sound = soundPool.load(this, R.raw.tick_1, 1)
+        val tick234Sound = soundPool.load(this, R.raw.tick_234, 1)
 
         // Initialise view elements
         seekBar.progress = bpm
@@ -78,6 +79,12 @@ class MainActivity : ComponentActivity() {
                         if(!countUp) currentChordText.text = nextChord
                         nextChord = getRandomKeyChord()
                         nextChordText.text = nextChord
+
+                        // Play metronome sound for first beat
+                        soundPool.play(tick1Sound, 1f, 1f, 1, 0, 1f)
+                    } else {
+                        // Play metronome sound for 2nd 3rd and 4th beats
+                        soundPool.play(tick234Sound, 1f, 1f, 1, 0, 1f)
                     }
 
                     // Show visual beat
@@ -85,9 +92,6 @@ class MainActivity : ComponentActivity() {
                     handler.postDelayed({
                         chordGroup.setBackgroundColor(getColor(android.R.color.transparent))
                     }, 100)
-
-                    // Play metronome sound
-                    soundPool.play(tickSound, 1f, 1f, 1, 0, 1f)
 
                     // Plan the next beat
                     val interval = 60000L / bpm
