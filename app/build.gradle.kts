@@ -4,13 +4,13 @@ plugins {
 }
 
 android {
-    namespace = "com.example.chordwormapp"
+    namespace = "com.oliveapps.chordtrainer"
     compileSdk {
         version = release(36)
     }
 
     defaultConfig {
-        applicationId = "com.example.chordwormapp"
+        applicationId = "com.oliveapps.chordtrainer"
         minSdk = 24
         targetSdk = 36
         versionCode = 1

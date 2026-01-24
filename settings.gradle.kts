@@ -19,6 +19,6 @@ dependencyResolutionManagement {
     }
 }
 
-rootProject.name = "Chord Worm"
+rootProject.name = "Chord Trainer App"
 include(":app")
  

@@ -1,4 +1,4 @@
-package com.example.chordwormapp.music
+package com.oliveapps.chordtrainer.music
 
 object Music {
     const val MAJOR_KEY_SEMITONE_INTERVALS = "2212221"

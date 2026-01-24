@@ -1,4 +1,4 @@
-package com.example.chordwormapp
+package com.oliveapps.chordtrainer
 
 import android.media.SoundPool
 import android.os.Bundle
@@ -7,7 +7,7 @@ import android.os.Looper
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
-import com.example.chordwormapp.music.Music
+import com.oliveapps.chordtrainer.music.Music
 
 class MainActivity : ComponentActivity() {
 

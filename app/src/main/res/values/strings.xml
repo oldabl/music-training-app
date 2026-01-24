@@ -1,5 +1,5 @@
 <resources>
-    <string name="app_name">Chord Worm</string>
+    <string name="app_name">Chord Trainer</string>
     <string name="start_button">Start</string>
     <string name="stop_button">Stop</string>
     <string name="bpm_text_title">BPM</string>

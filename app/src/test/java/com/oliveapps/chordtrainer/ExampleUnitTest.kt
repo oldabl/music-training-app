@@ -1,4 +1,4 @@
-package com.example.chordwormapp
+package com.oliveapps.chordtrainer
 
 import org.junit.Test
 
