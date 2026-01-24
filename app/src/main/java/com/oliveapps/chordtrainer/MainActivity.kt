@@ -27,12 +27,15 @@ class MainActivity : ComponentActivity() {
     // To store the chords to play
     private var currentKeyChords = Array<String>(7) { "" }
     private var nextChord = ""
+    private var currentChord = ""
+    private var countSameChord = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
         // Get all view elements
+        val wholeLayout = findViewById<LinearLayout>(R.id.wholeLayout)
         val chordGroup = findViewById<LinearLayout>(R.id.chordGroup)
         val currentChordText = findViewById<TextView>(R.id.currentChordText)
         val nextChordText = findViewById<TextView>(R.id.nextChordText)
@@ -76,8 +79,12 @@ class MainActivity : ComponentActivity() {
                     }
                     // If first beat
                     if(beatNumber == 0) {
-                        if(!countUp) currentChordText.text = nextChord
-                        nextChord = getRandomKeyChord()
+                        if(!countUp) {
+                            currentChord = nextChord
+                            currentChordText.text = currentChord
+                        }
+
+                        findNextChord()
                         nextChordText.text = nextChord
 
                         // Play metronome sound for first beat
@@ -88,9 +95,9 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Show visual beat
-                    chordGroup.setBackgroundColor(getColor(R.color.grey))
+                    currentChordText.setBackgroundColor(getColor(R.color.grey))
                     handler.postDelayed({
-                        chordGroup.setBackgroundColor(getColor(android.R.color.transparent))
+                        currentChordText.setBackgroundColor(getColor(android.R.color.transparent))
                     }, 100)
 
                     // Plan the next beat
@@ -111,7 +118,6 @@ class MainActivity : ComponentActivity() {
         chordSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val keySelected = resources.getStringArray(R.array.keys_array)[position]
-                println(keySelected)
                 makeCurrentKeyChordList(keySelected)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
@@ -121,25 +127,24 @@ class MainActivity : ComponentActivity() {
         startStopButton.setOnClickListener {
             if (!isRunning) {
                 // Start metronome
-                isRunning = true
-                countUp = true
-                beatNumber = 0
-                nextChord = ""
-                handler.post(tickRunnable)
+                startMetronome()
                 // Remove key selector and show stop button
                 chordSpinner.visibility = View.GONE
                 startStopButton.setText(R.string.stop_button);
                 // Display chords to play
                 chordGroup.visibility = View.VISIBLE
+                // Keep screen on while running
+                wholeLayout.keepScreenOn = true
             } else {
                 // Stop metronome
-                isRunning = false
-                handler.removeCallbacks(tickRunnable)
+                stopMetronome()
                 // Remove chords to play
                 chordGroup.visibility = View.GONE
                 // Display key selector and show start button
                 chordSpinner.visibility = View.VISIBLE
-                startStopButton.setText(R.string.start_button);
+                startStopButton.setText(R.string.start_button)
+                // Allow screen to turn off when stopping
+                wholeLayout.keepScreenOn = false
             }
         }
     }
@@ -161,19 +166,51 @@ class MainActivity : ComponentActivity() {
         return currentKeyChords[cn]
     }
 
+    // Will fabricate the chord list for the current key
     fun makeCurrentKeyChordList(key: String) {
-        var ALL_NOTES_WITH_ALTERATIONS_TWICE = Music.ALL_NOTES_WITH_SHARPS + '|' + Music.ALL_NOTES_WITH_SHARPS
-        if(Music.KEYS_WITH_FLATS.contains("|"+key+"|"))
-            ALL_NOTES_WITH_ALTERATIONS_TWICE = Music.ALL_NOTES_WITH_FLATS + '|' + Music.ALL_NOTES_WITH_FLATS
+        // Find the right notes and make them double
+        // So that we find all notes in key, regardless of which note we start at
+        var allNotesWithAlterations = Music.ALL_NOTES_WITH_SHARPS
+        if(Music.KEYS_WITH_FLATS.contains("|$key|"))
+            allNotesWithAlterations = Music.ALL_NOTES_WITH_FLATS
+        val allNotesWithAlterationsTwice = "$allNotesWithAlterations|$allNotesWithAlterations"
 
-        var all_notes = ALL_NOTES_WITH_ALTERATIONS_TWICE.split('|')
-        val firstNoteIndex = all_notes.indexOf(key)
-        all_notes = all_notes.subList(firstNoteIndex, firstNoteIndex + 12)
+        // Find the index of first note
+        var allNotes = allNotesWithAlterationsTwice.split('|')
+        val firstNoteIndex = allNotes.indexOf(key)
+
+        // Now we make the list we need to find all the notes
+        val only12NotesFromKey = allNotes.subList(firstNoteIndex, firstNoteIndex + 12)
         var sumIntervals = 0
         for(noteNumber in 0..<7) {
-            val noteInKey = all_notes[sumIntervals] + Music.MAJOR_KEY_CHORD_QUALITIES[noteNumber]
+            val noteInKey = only12NotesFromKey[sumIntervals] + Music.MAJOR_KEY_CHORD_QUALITIES[noteNumber]
             currentKeyChords[noteNumber] = noteInKey.trim()
             sumIntervals += Music.MAJOR_KEY_SEMITONE_INTERVALS[noteNumber].toString().toInt()
+        }
+    }
+
+    fun startMetronome() {
+        isRunning = true
+        countUp = true
+        beatNumber = 0
+        nextChord = ""
+        currentChord = ""
+        handler.post(tickRunnable)
+    }
+
+    fun stopMetronome() {
+        isRunning = false
+        handler.removeCallbacks(tickRunnable)
+    }
+
+    fun findNextChord() {
+        nextChord = getRandomKeyChord()
+        if(currentChord == nextChord) countSameChord++
+        else countSameChord = 0
+        if(countSameChord == 2) {
+            while(nextChord == currentChord) {
+                nextChord = getRandomKeyChord()
+            }
         }
     }
 }

@@ -1,5 +1,6 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
+    android:id="@+id/wholeLayout"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
     android:orientation="vertical"
@@ -21,7 +22,7 @@
         <TextView
             android:id="@+id/currentChordText"
             android:layout_width="match_parent"
-            android:layout_height="300dp"
+            android:layout_height="200dp"
             android:textSize="70sp"
             android:textAlignment="center"/>
         <TextView
@@ -31,13 +32,14 @@
             android:textSize="40sp"
             android:textAlignment="center"/>
     </LinearLayout>
+
     <Spinner
         android:id="@+id/chordSpinner"
         android:layout_width="match_parent"
-        android:layout_height="0dp"
+        android:layout_height="19dp"
         android:layout_weight="0.9"
-        android:spinnerMode="dropdown"
-        android:entries="@array/keys_array"/>
+        android:entries="@array/keys_array"
+        android:spinnerMode="dropdown" />
 
     <TextView
         android:id="@+id/bpmText"
