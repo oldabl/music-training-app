@@ -2,5 +2,20 @@
     <string name="app_name">Chord Worm</string>
     <string name="start_button">Start</string>
     <string name="stop_button">Stop</string>
-    <string name="bpm_text_init">BPM: 60</string>
+    <string name="bpm_text_title">BPM</string>
+    <string name="next_chord_title">Next chord:</string>
+    <string-array name="keys_array">
+        <item>C</item>
+        <item>Db</item>
+        <item>D</item>
+        <item>Eb</item>
+        <item>E</item>
+        <item>F</item>
+        <item>Gb</item>
+        <item>G</item>
+        <item>Ab</item>
+        <item>A</item>
+        <item>Bb</item>
+        <item>B</item>
+    </string-array>
 </resources>

@@ -6,33 +6,63 @@
     android:gravity="center"
     android:padding="24dp">
 
-    <TextView
-        android:id="@+id/chordText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:textSize="20sp"
-        android:layout_marginBottom="16dp"/>
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.1"/>
+
+    <LinearLayout
+        android:id="@+id/chordGroup"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.9"
+        android:orientation="vertical"
+        android:visibility="gone">
+        <TextView
+            android:id="@+id/currentChordText"
+            android:layout_width="match_parent"
+            android:layout_height="300dp"
+            android:textSize="70sp"
+            android:textAlignment="center"/>
+        <TextView
+            android:id="@+id/nextChordText"
+            android:layout_width="match_parent"
+            android:layout_height="200dp"
+            android:textSize="40sp"
+            android:textAlignment="center"/>
+    </LinearLayout>
+    <Spinner
+        android:id="@+id/chordSpinner"
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.9"
+        android:spinnerMode="dropdown"
+        android:entries="@array/keys_array"/>
 
     <TextView
         android:id="@+id/bpmText"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:text="@string/bpm_text_init"
-        android:textSize="20sp"
-        android:layout_marginBottom="16dp"/>
-
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:textSize="40sp"
+        android:textAlignment="center"/>
     <SeekBar
         android:id="@+id/bpmSeekBar"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
         android:max="240"
-        android:progress="60"/>
-
+        android:min="30"/>
     <Button
         android:id="@+id/startStopButton"
         android:layout_width="match_parent"
-        android:layout_height="wrap_content"
-        android:text="@string/start_button"
-        android:layout_marginTop="24dp"/>
+        android:layout_height="0dp"
+        android:layout_weight="0.25"
+        android:text="@string/start_button"/>
+
+    <View
+        android:layout_width="match_parent"
+        android:layout_height="0dp"
+        android:layout_weight="0.25"/>
 
 </LinearLayout>
