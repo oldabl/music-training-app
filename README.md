@@ -1,2 +1,3 @@
-Music training app for metronome and changing chords randomly to train your ability to change chords on any instrument
-Will be done in C++
+Train to switch between chord positions!
+
+This app gives you a metronome, and chords that you have to play. This helps practice these chords changes, on any instrument you like :)
