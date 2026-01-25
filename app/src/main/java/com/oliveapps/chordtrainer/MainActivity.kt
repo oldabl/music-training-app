@@ -4,10 +4,12 @@ import android.media.SoundPool
 import android.os.Bundle
 import android.os.Handler
 import android.os.Looper
+import android.util.TypedValue
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
 import com.oliveapps.chordtrainer.music.Music
+
 
 class MainActivity : ComponentActivity() {
 
@@ -19,7 +21,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var soundPool: SoundPool
 
     // To manage the metronome attributes
-    private var bpm = 60
+    private var bpm = 80
     private var isRunning = false
     private var beatNumber = 0
     private var countUp = false
@@ -41,6 +43,7 @@ class MainActivity : ComponentActivity() {
         val nextChordText = findViewById<TextView>(R.id.nextChordText)
         val chordSpinner = findViewById<Spinner>(R.id.chordSpinner)
         val bpmText = findViewById<TextView>(R.id.bpmText)
+        val bpmTitleText = findViewById<TextView>(R.id.bpmTitleText)
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
 
@@ -53,15 +56,20 @@ class MainActivity : ComponentActivity() {
         val tick234Sound = soundPool.load(this, R.raw.tick_234, 1)
 
         // Initialise view elements
+        bpm = resources.getInteger(R.integer.DEFAULT_BPM)
         seekBar.progress = bpm
-        bpmText.text = makeBpmText(bpm)
+        bpmText.text = bpm.toString()
+        bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(bpm))
+        bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(bpm))
         startStopButton.setText(R.string.start_button)
 
         // Handle changing the metronome bpm
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
                 bpm = progress
-                bpmText.text = makeBpmText(bpm)
+                bpmText.text = bpm.toString()
+                bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(bpm))
+                bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(bpm))
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
             override fun onStopTrackingTouch(sb: SeekBar?) {}
@@ -71,6 +79,9 @@ class MainActivity : ComponentActivity() {
         tickRunnable = object : Runnable {
             override fun run() {
                 if (isRunning) {
+
+                    // Display background longer on first beat
+                    var metronomeClickDelay = resources.getInteger(R.integer.METRONOME_CLICK_DELAY).toLong()
 
                     // If has been started just now
                     if(countUp) {
@@ -87,6 +98,8 @@ class MainActivity : ComponentActivity() {
                         findNextChord()
                         nextChordText.text = nextChord
 
+                        metronomeClickDelay *= resources.getInteger(R.integer.METRONOME_CLICK_MULTIPLY_FIRST_BEAT)
+
                         // Play metronome sound for first beat
                         soundPool.play(tick1Sound, 1f, 1f, 1, 0, 1f)
                     } else {
@@ -95,10 +108,10 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Show visual beat
-                    currentChordText.setBackgroundColor(getColor(R.color.grey))
+                    currentChordText.setBackgroundColor(getColor(R.color.teal_200))
                     handler.postDelayed({
                         currentChordText.setBackgroundColor(getColor(android.R.color.transparent))
-                    }, 100)
+                    }, metronomeClickDelay)
 
                     // Plan the next beat
                     val interval = 60000L / bpm
@@ -155,11 +168,6 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    // Create text that shows BPM properly
-    fun makeBpmText(bpm: Int): String {
-        return bpm.toString() + " " + getString(R.string.bpm_text_title)
-    }
-
     // Return a random chord in the key selected
     fun getRandomKeyChord(): String {
         val cn = (0..6).random()
@@ -189,6 +197,7 @@ class MainActivity : ComponentActivity() {
         }
     }
 
+    // Set everything to start metronome
     fun startMetronome() {
         isRunning = true
         countUp = true
@@ -198,11 +207,13 @@ class MainActivity : ComponentActivity() {
         handler.post(tickRunnable)
     }
 
+    // Update all flags when metronome stops
     fun stopMetronome() {
         isRunning = false
         handler.removeCallbacks(tickRunnable)
     }
 
+    // Find the next chord from the key chords
     fun findNextChord() {
         nextChord = getRandomKeyChord()
         if(currentChord == nextChord) countSameChord++
@@ -212,5 +223,21 @@ class MainActivity : ComponentActivity() {
                 nextChord = getRandomKeyChord()
             }
         }
+    }
+
+    // Get BPM text size
+    fun getBpmTextSize(bpm: Int): Float {
+        return resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE)+
+                (bpm.toFloat()-resources.getInteger(R.integer.MIN_BPM))*
+                (resources.getInteger(R.integer.MAX_BPM_TEXT_SIZE)-
+                        resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE))/
+                resources.getInteger(R.integer.MAX_BPM)
+    }
+    fun getBpmTitleTextSize(bpm: Int): Float {
+        return resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE)+
+                (bpm.toFloat()-resources.getInteger(R.integer.MIN_BPM))*
+                (resources.getInteger(R.integer.MAX_BPM_TITLE_TEXT_SIZE)-
+                        resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE))/
+                resources.getInteger(R.integer.MAX_BPM)
     }
 }

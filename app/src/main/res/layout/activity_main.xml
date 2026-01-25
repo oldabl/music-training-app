@@ -5,66 +5,105 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:padding="24dp">
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.1"/>
+    android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:id="@+id/chordGroup"
+        android:id="@+id/keyAndChordGroup"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.9"
+        android:layout_weight="1"
         android:orientation="vertical"
-        android:visibility="gone">
-        <TextView
-            android:id="@+id/currentChordText"
+        android:paddingBottom="15dp">
+        <LinearLayout
+            android:id="@+id/chordGroup"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:textSize="70sp"
-            android:textAlignment="center"/>
-        <TextView
-            android:id="@+id/nextChordText"
+            android:layout_height="fill_parent"
+            android:orientation="vertical"
+            android:visibility="gone">
+            <TextView
+                android:id="@+id/currentChordText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:autoSizeTextType="uniform"
+                android:gravity="center"
+                android:layout_marginTop="20dp"
+                android:textColor="@color/teal_900"
+                android:text="@string/default_empty_text"/>
+            <TextView
+                android:id="@+id/nextChordPreText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.2"
+                android:autoSizeTextType="uniform"
+                android:text="@string/next_chord_title"
+                android:gravity="bottom|center"
+                android:textColor="@color/teal_700"
+                android:layout_marginTop="20dp"/>
+            <TextView
+                android:id="@+id/nextChordText"
+                android:layout_width="match_parent"
+                android:layout_height="0dp"
+                android:layout_weight="0.4"
+                android:autoSizeTextType="uniform"
+                android:gravity="top|center"
+                android:textColor="@color/teal_700"
+                android:text="@string/default_empty_text"
+                android:layout_marginBottom="40dp"/>
+        </LinearLayout>
+        <Spinner
+            android:id="@+id/chordSpinner"
             android:layout_width="match_parent"
-            android:layout_height="200dp"
-            android:textSize="40sp"
-            android:textAlignment="center"/>
+            android:layout_height="fill_parent"
+            android:entries="@array/keys_array"
+            android:textSize="50sp"
+            android:visibility="visible"
+            android:textAlignment="viewEnd"
+            android:dropDownWidth="wrap_content"
+            android:spinnerMode="dropdown" />
     </LinearLayout>
 
-    <Spinner
-        android:id="@+id/chordSpinner"
-        android:layout_width="match_parent"
-        android:layout_height="19dp"
-        android:layout_weight="0.9"
-        android:entries="@array/keys_array"
-        android:spinnerMode="dropdown" />
-
-    <TextView
-        android:id="@+id/bpmText"
+    <LinearLayout
+        android:id="@+id/optionGroup"
         android:layout_width="match_parent"
         android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:textSize="40sp"
-        android:textAlignment="center"/>
-    <SeekBar
-        android:id="@+id/bpmSeekBar"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:max="240"
-        android:min="30"/>
-    <Button
-        android:id="@+id/startStopButton"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"
-        android:text="@string/start_button"/>
-
-    <View
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="0.25"/>
+        android:layout_weight="1"
+        android:orientation="vertical"
+        android:padding="30dp"
+        android:background="@color/teal_200">
+        <TextView
+            android:id="@+id/bpmText"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:gravity="bottom"
+            android:textAlignment="center"
+            android:text="@string/default_empty_text"/>
+        <TextView
+            android:id="@+id/bpmTitleText"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="0.5"
+            android:textSize="20sp"
+            android:textAlignment="center"
+            android:gravity="top"
+            android:text="@string/bpm_text_title"/>
+        <SeekBar
+            android:id="@+id/bpmSeekBar"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:max="@integer/MAX_BPM"
+            android:min="@integer/MIN_BPM"
+            android:rotation="-4" />
+        <Button
+            android:id="@+id/startStopButton"
+            android:layout_width="match_parent"
+            android:layout_height="0dp"
+            android:layout_weight="1"
+            android:text="@string/start_button"
+            android:textSize="40sp"
+            android:textColor="@color/teal_800"/>
+    </LinearLayout>
 
 </LinearLayout>

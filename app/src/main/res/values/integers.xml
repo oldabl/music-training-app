@@ -1,0 +1,11 @@
+<resources>
+    <integer name="MIN_BPM">40</integer>
+    <integer name="MAX_BPM">180</integer>
+    <integer name="DEFAULT_BPM">80</integer>
+    <integer name="MIN_BPM_TEXT_SIZE">20</integer>
+    <integer name="MAX_BPM_TEXT_SIZE">80</integer>
+    <integer name="MIN_BPM_TITLE_TEXT_SIZE">10</integer>
+    <integer name="MAX_BPM_TITLE_TEXT_SIZE">40</integer>
+    <integer name="METRONOME_CLICK_DELAY">150</integer>
+    <integer name="METRONOME_CLICK_MULTIPLY_FIRST_BEAT">2</integer>
+</resources>
