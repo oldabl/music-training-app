@@ -1,7 +1,12 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="teal_200">#FF03DAC5</color>
-    <color name="teal_700">#FF018786</color>
-    <color name="teal_800">#FF016463</color>
-    <color name="teal_900">#FF014544</color>
+    <color name="background">#FFFFFFFF</color>
+    <color name="backgroundSecondary">#FF03DAC5</color>
+    <color name="backgroundCurrentChordTick">#FF03DAC5</color>
+    <color name="backgroundButton">#FF25FCE7</color>
+    <color name="currentChord">#FF014544</color>
+    <color name="nextChord">#FF018786</color>
+    <color name="bpm">#FF014544</color>
+    <color name="textButton">#FF016463</color>
+    <color name="textButtonDisabled">#FF56B9B8</color>
 </resources>

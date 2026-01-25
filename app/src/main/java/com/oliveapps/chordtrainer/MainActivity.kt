@@ -90,7 +90,13 @@ class MainActivity : ComponentActivity() {
                     wholeLayout.keepScreenOn = false
                 }
 
-                startStopButton.isEnabled = if(state.key == "") false else true
+                if(state.key == "") {
+                    startStopButton.isEnabled = false
+                    startStopButton.setTextColor(getColor(R.color.textButtonDisabled))
+                } else {
+                    startStopButton.isEnabled = true
+                    startStopButton.setTextColor(getColor(R.color.textButton))
+                }
 
                 currentChordText.text =
                     if (state.countUp) (4 - state.beatNumber).toString()
@@ -148,7 +154,7 @@ class MainActivity : ComponentActivity() {
                     }
 
                     // Switch background colour on tick
-                    currentChordText.setBackgroundColor(getColor(R.color.teal_200))
+                    currentChordText.setBackgroundColor(getColor(R.color.backgroundCurrentChordTick))
                     handler.postDelayed({
                         currentChordText.setBackgroundColor(
                             getColor(android.R.color.transparent)

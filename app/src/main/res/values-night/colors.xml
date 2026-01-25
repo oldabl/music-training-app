@@ -1,0 +1,12 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <color name="background">#FF000000</color>
+    <color name="backgroundSecondary">#FF019681</color>
+    <color name="backgroundCurrentChordTick">#FF009681</color>
+    <color name="backgroundButton">#FF00A792</color>
+    <color name="currentChord">#FF78BCBB</color>
+    <color name="nextChord">#FF78FEFD</color>
+    <color name="bpm">#FF78BCBB</color>
+    <color name="textButton">#FF78DBDA</color>
+    <color name="textButtonDisabled">#FF006362</color>
+</resources>

@@ -5,7 +5,8 @@
     android:layout_height="match_parent"
     android:orientation="vertical"
     android:gravity="center"
-    android:fitsSystemWindows="true">
+    android:fitsSystemWindows="true"
+    android:background="@color/background">
 
     <LinearLayout
         android:layout_width="match_parent"
@@ -27,7 +28,7 @@
                 android:autoSizeTextType="uniform"
                 android:gravity="center"
                 android:layout_marginTop="20dp"
-                android:textColor="@color/teal_900"
+                android:textColor="@color/currentChord"
                 android:text="@string/default_empty_text"/>
             <TextView
                 android:layout_width="match_parent"
@@ -36,7 +37,7 @@
                 android:autoSizeTextType="uniform"
                 android:text="@string/next_chord_title"
                 android:gravity="bottom|center"
-                android:textColor="@color/teal_700"
+                android:textColor="@color/nextChord"
                 android:layout_marginTop="20dp"/>
             <TextView
                 android:id="@+id/nextChordText"
@@ -45,7 +46,7 @@
                 android:layout_weight="0.4"
                 android:autoSizeTextType="uniform"
                 android:gravity="top|center"
-                android:textColor="@color/teal_700"
+                android:textColor="@color/nextChord"
                 android:text="@string/default_empty_text"
                 android:layout_marginBottom="40dp"/>
         </LinearLayout>
@@ -73,7 +74,7 @@
         android:layout_weight="1"
         android:orientation="vertical"
         android:padding="30dp"
-        android:background="@color/teal_200">
+        android:background="@color/backgroundSecondary">
         <TextView
             android:id="@+id/bpmText"
             android:layout_width="match_parent"
@@ -81,6 +82,7 @@
             android:layout_weight="1"
             android:gravity="bottom"
             android:textAlignment="center"
+            android:textColor="@color/bpm"
             android:text="@string/default_empty_text"/>
         <TextView
             android:id="@+id/bpmTitleText"
@@ -106,7 +108,8 @@
             android:layout_weight="1"
             android:text="@string/start_button"
             android:textSize="40sp"
-            android:textColor="@color/teal_800"/>
+            android:background="@color/backgroundButton"
+            android:textColor="@color/textButton"/>
     </LinearLayout>
 
 </LinearLayout>
