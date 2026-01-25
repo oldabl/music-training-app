@@ -52,7 +52,7 @@
                 android:layout_marginBottom="40dp"/>
         </LinearLayout>
         <Spinner
-            android:id="@+id/chordSpinner"
+            android:id="@+id/keySpinner"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
             android:entries="@array/keys_array"

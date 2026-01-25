@@ -8,7 +8,7 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
-import com.oliveapps.chordtrainer.music.Music
+import com.oliveapps.chordtrainer.util.*
 
 
 class MainActivity : ComponentActivity() {
@@ -21,10 +21,7 @@ class MainActivity : ComponentActivity() {
     private lateinit var soundPool: SoundPool
 
     // To manage the metronome attributes
-    private var bpm = 80
-    private var isRunning = false
-    private var beatNumber = 0
-    private var countUp = false
+    private lateinit var metronome: Metronome
 
     // To store the chords to play
     private var currentKeyChords = Array<String>(7) { "" }
@@ -41,11 +38,14 @@ class MainActivity : ComponentActivity() {
         val chordGroup = findViewById<LinearLayout>(R.id.chordGroup)
         val currentChordText = findViewById<TextView>(R.id.currentChordText)
         val nextChordText = findViewById<TextView>(R.id.nextChordText)
-        val chordSpinner = findViewById<Spinner>(R.id.chordSpinner)
+        val keySpinner = findViewById<Spinner>(R.id.keySpinner)
         val bpmText = findViewById<TextView>(R.id.bpmText)
         val bpmTitleText = findViewById<TextView>(R.id.bpmTitleText)
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
+
+        // Initialise metronome
+        metronome = Metronome(resources.getInteger(R.integer.DEFAULT_BPM))
 
         // Initialise metronome looper thread
         handler = Handler(Looper.getMainLooper())
@@ -56,20 +56,19 @@ class MainActivity : ComponentActivity() {
         val tick234Sound = soundPool.load(this, R.raw.tick_234, 1)
 
         // Initialise view elements
-        bpm = resources.getInteger(R.integer.DEFAULT_BPM)
-        seekBar.progress = bpm
-        bpmText.text = bpm.toString()
-        bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(bpm))
-        bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(bpm))
+        seekBar.progress = metronome.bpm
+        bpmText.text = metronome.bpm.toString()
+        bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(metronome.bpm))
+        bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(metronome.bpm))
         startStopButton.setText(R.string.start_button)
 
         // Handle changing the metronome bpm
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                bpm = progress
-                bpmText.text = bpm.toString()
-                bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(bpm))
-                bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(bpm))
+                metronome.bpm = progress
+                bpmText.text = metronome.bpm.toString()
+                bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(metronome.bpm))
+                bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(metronome.bpm))
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
             override fun onStopTrackingTouch(sb: SeekBar?) {}
@@ -78,28 +77,25 @@ class MainActivity : ComponentActivity() {
         // Handle the metronome
         tickRunnable = object : Runnable {
             override fun run() {
-                if (isRunning) {
+                if (metronome.isRunning) {
 
                     // Display background longer on first beat
                     var metronomeClickDelay = resources.getInteger(R.integer.METRONOME_CLICK_DELAY).toLong()
 
                     // If has been started just now
-                    if(countUp) {
-                        val countDown = 4 - beatNumber
+                    if(metronome.countUp) {
+                        val countDown = 4 - metronome.beatNumber
                         currentChordText.text = countDown.toString()
                     }
-                    // If first beat
-                    if(beatNumber == 0) {
-                        if(!countUp) {
+                    // If first beat, set next chord and UI colours
+                    if(metronome.beatNumber == 0) {
+                        if(!metronome.countUp) {
                             currentChord = nextChord
                             currentChordText.text = currentChord
                         }
-
                         findNextChord()
                         nextChordText.text = nextChord
-
                         metronomeClickDelay *= resources.getInteger(R.integer.METRONOME_CLICK_MULTIPLY_FIRST_BEAT)
-
                         // Play metronome sound for first beat
                         soundPool.play(tick1Sound, 1f, 1f, 1, 0, 1f)
                     } else {
@@ -114,21 +110,16 @@ class MainActivity : ComponentActivity() {
                     }, metronomeClickDelay)
 
                     // Plan the next beat
-                    val interval = 60000L / bpm
-                    handler.postDelayed(this, interval)
+                    handler.postDelayed(this, metronome.intervalMs())
 
-                    // Increase beat number %4
-                    beatNumber++
-                    beatNumber %= 4
-
-                    // If back on first beat, count up is finished
-                    if(beatNumber == 0) countUp = false
+                    // Prepare next beat
+                    metronome.nextBeat()
                 }
             }
         }
 
         // Handle selection of key
-        chordSpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
+        keySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val keySelected = resources.getStringArray(R.array.keys_array)[position]
                 makeCurrentKeyChordList(keySelected)
@@ -138,11 +129,11 @@ class MainActivity : ComponentActivity() {
 
         // Handle the start and stop buttons
         startStopButton.setOnClickListener {
-            if (!isRunning) {
+            if (!metronome.isRunning) {
                 // Start metronome
                 startMetronome()
                 // Remove key selector and show stop button
-                chordSpinner.visibility = View.GONE
+                keySpinner.visibility = View.GONE
                 startStopButton.setText(R.string.stop_button);
                 // Display chords to play
                 chordGroup.visibility = View.VISIBLE
@@ -154,7 +145,7 @@ class MainActivity : ComponentActivity() {
                 // Remove chords to play
                 chordGroup.visibility = View.GONE
                 // Display key selector and show start button
-                chordSpinner.visibility = View.VISIBLE
+                keySpinner.visibility = View.VISIBLE
                 startStopButton.setText(R.string.start_button)
                 // Allow screen to turn off when stopping
                 wholeLayout.keepScreenOn = false
@@ -199,9 +190,7 @@ class MainActivity : ComponentActivity() {
 
     // Set everything to start metronome
     fun startMetronome() {
-        isRunning = true
-        countUp = true
-        beatNumber = 0
+        metronome.start()
         nextChord = ""
         currentChord = ""
         handler.post(tickRunnable)
@@ -209,7 +198,7 @@ class MainActivity : ComponentActivity() {
 
     // Update all flags when metronome stops
     fun stopMetronome() {
-        isRunning = false
+        metronome.stop()
         handler.removeCallbacks(tickRunnable)
     }
 
