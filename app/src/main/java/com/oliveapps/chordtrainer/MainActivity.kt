@@ -8,7 +8,8 @@ import android.util.TypedValue
 import android.view.View
 import android.widget.*
 import androidx.activity.ComponentActivity
-import com.oliveapps.chordtrainer.util.*
+import com.oliveapps.chordtrainer.util.Metronome
+import com.oliveapps.chordtrainer.util.ChordManager
 
 
 class MainActivity : ComponentActivity() {
@@ -23,11 +24,8 @@ class MainActivity : ComponentActivity() {
     // To manage the metronome attributes
     private lateinit var metronome: Metronome
 
-    // To store the chords to play
-    private var currentKeyChords = Array<String>(7) { "" }
-    private var nextChord = ""
-    private var currentChord = ""
-    private var countSameChord = 0
+    // To manage the chord logic
+    private lateinit var chordManager: ChordManager
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -43,6 +41,9 @@ class MainActivity : ComponentActivity() {
         val bpmTitleText = findViewById<TextView>(R.id.bpmTitleText)
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
+
+        // Initialise chord manager
+        chordManager = ChordManager()
 
         // Initialise metronome
         metronome = Metronome(resources.getInteger(R.integer.DEFAULT_BPM))
@@ -78,10 +79,8 @@ class MainActivity : ComponentActivity() {
         tickRunnable = object : Runnable {
             override fun run() {
                 if (metronome.isRunning) {
-
                     // Display background longer on first beat
                     var metronomeClickDelay = resources.getInteger(R.integer.METRONOME_CLICK_DELAY).toLong()
-
                     // If has been started just now
                     if(metronome.countUp) {
                         val countDown = 4 - metronome.beatNumber
@@ -89,12 +88,9 @@ class MainActivity : ComponentActivity() {
                     }
                     // If first beat, set next chord and UI colours
                     if(metronome.beatNumber == 0) {
-                        if(!metronome.countUp) {
-                            currentChord = nextChord
-                            currentChordText.text = currentChord
-                        }
-                        findNextChord()
-                        nextChordText.text = nextChord
+                        if(!metronome.countUp)
+                            currentChordText.text = chordManager.goToNextChord()
+                        nextChordText.text = chordManager.findNextChord()
                         metronomeClickDelay *= resources.getInteger(R.integer.METRONOME_CLICK_MULTIPLY_FIRST_BEAT)
                         // Play metronome sound for first beat
                         soundPool.play(tick1Sound, 1f, 1f, 1, 0, 1f)
@@ -102,16 +98,13 @@ class MainActivity : ComponentActivity() {
                         // Play metronome sound for 2nd 3rd and 4th beats
                         soundPool.play(tick234Sound, 1f, 1f, 1, 0, 1f)
                     }
-
                     // Show visual beat
                     currentChordText.setBackgroundColor(getColor(R.color.teal_200))
                     handler.postDelayed({
                         currentChordText.setBackgroundColor(getColor(android.R.color.transparent))
                     }, metronomeClickDelay)
-
                     // Plan the next beat
                     handler.postDelayed(this, metronome.intervalMs())
-
                     // Prepare next beat
                     metronome.nextBeat()
                 }
@@ -122,7 +115,7 @@ class MainActivity : ComponentActivity() {
         keySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
             override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
                 val keySelected = resources.getStringArray(R.array.keys_array)[position]
-                makeCurrentKeyChordList(keySelected)
+                chordManager.setKey(keySelected)
             }
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
@@ -130,8 +123,8 @@ class MainActivity : ComponentActivity() {
         // Handle the start and stop buttons
         startStopButton.setOnClickListener {
             if (!metronome.isRunning) {
-                // Start metronome
-                startMetronome()
+                // Start rhythm
+                startRhythm()
                 // Remove key selector and show stop button
                 keySpinner.visibility = View.GONE
                 startStopButton.setText(R.string.stop_button);
@@ -140,8 +133,8 @@ class MainActivity : ComponentActivity() {
                 // Keep screen on while running
                 wholeLayout.keepScreenOn = true
             } else {
-                // Stop metronome
-                stopMetronome()
+                // Stop rhythm
+                stopRhythm()
                 // Remove chords to play
                 chordGroup.visibility = View.GONE
                 // Display key selector and show start button
@@ -159,59 +152,17 @@ class MainActivity : ComponentActivity() {
         super.onDestroy()
     }
 
-    // Return a random chord in the key selected
-    fun getRandomKeyChord(): String {
-        val cn = (0..6).random()
-        return currentKeyChords[cn]
-    }
-
-    // Will fabricate the chord list for the current key
-    fun makeCurrentKeyChordList(key: String) {
-        // Find the right notes and make them double
-        // So that we find all notes in key, regardless of which note we start at
-        var allNotesWithAlterations = Music.ALL_NOTES_WITH_SHARPS
-        if(Music.KEYS_WITH_FLATS.contains("|$key|"))
-            allNotesWithAlterations = Music.ALL_NOTES_WITH_FLATS
-        val allNotesWithAlterationsTwice = "$allNotesWithAlterations|$allNotesWithAlterations"
-
-        // Find the index of first note
-        var allNotes = allNotesWithAlterationsTwice.split('|')
-        val firstNoteIndex = allNotes.indexOf(key)
-
-        // Now we make the list we need to find all the notes
-        val only12NotesFromKey = allNotes.subList(firstNoteIndex, firstNoteIndex + 12)
-        var sumIntervals = 0
-        for(noteNumber in 0..<7) {
-            val noteInKey = only12NotesFromKey[sumIntervals] + Music.MAJOR_KEY_CHORD_QUALITIES[noteNumber]
-            currentKeyChords[noteNumber] = noteInKey.trim()
-            sumIntervals += Music.MAJOR_KEY_SEMITONE_INTERVALS[noteNumber].toString().toInt()
-        }
-    }
-
-    // Set everything to start metronome
-    fun startMetronome() {
+    // Starts metronome and chord thread
+    fun startRhythm() {
+        chordManager.reset()
         metronome.start()
-        nextChord = ""
-        currentChord = ""
         handler.post(tickRunnable)
     }
 
-    // Update all flags when metronome stops
-    fun stopMetronome() {
+    // Stops metronome and chord thread
+    fun stopRhythm() {
         metronome.stop()
         handler.removeCallbacks(tickRunnable)
-    }
-
-    // Find the next chord from the key chords
-    fun findNextChord() {
-        nextChord = getRandomKeyChord()
-        if(currentChord == nextChord) countSameChord++
-        else countSameChord = 0
-        if(countSameChord == 2) {
-            while(nextChord == currentChord) {
-                nextChord = getRandomKeyChord()
-            }
-        }
     }
 
     // Get BPM text size
