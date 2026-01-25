@@ -5,6 +5,7 @@
     <string name="stop_button">Pause</string>
     <string name="bpm_text_title">BPM</string>
     <string name="next_chord_title">NEXT CHORD</string>
+    <string name="key_dropdown_hint">Key</string>
     <string-array name="keys_array">
         <item>C</item>
         <item>Db</item>

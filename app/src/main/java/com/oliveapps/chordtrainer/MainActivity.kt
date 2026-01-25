@@ -6,11 +6,11 @@ import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.view.View
-import android.widget.AdapterView
+import android.widget.ArrayAdapter
+import android.widget.AutoCompleteTextView
 import android.widget.Button
 import android.widget.LinearLayout
 import android.widget.SeekBar
-import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
@@ -39,11 +39,20 @@ class MainActivity : ComponentActivity() {
         val chordGroup = findViewById<LinearLayout>(R.id.chordGroup)
         val currentChordText = findViewById<TextView>(R.id.currentChordText)
         val nextChordText = findViewById<TextView>(R.id.nextChordText)
-        val keySpinner = findViewById<Spinner>(R.id.keySpinner)
         val bpmText = findViewById<TextView>(R.id.bpmText)
         val bpmTitleText = findViewById<TextView>(R.id.bpmTitleText)
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
+        // Key dropdown selector
+        val keyDropdown = findViewById<AutoCompleteTextView>(R.id.keyDropdown)
+        val adapter = ArrayAdapter(
+            this,
+            android.R.layout.simple_list_item_1,
+            resources.getStringArray(R.array.keys_array)
+        )
+        keyDropdown.setAdapter(adapter)
+        keyDropdown.keyListener = null
+        keyDropdown.showSoftInputOnFocus = false
 
         // Helpers
         handler = Handler(Looper.getMainLooper())
@@ -58,7 +67,6 @@ class MainActivity : ComponentActivity() {
         lifecycleScope.launch {
             viewModel.uiState.collect { state ->
 
-                startStopButton.setText(R.string.start_button)
                 seekBar.progress = state.bpm
                 bpmText.text = state.bpm.toString()
                 bpmText.setTextSize(
@@ -72,15 +80,17 @@ class MainActivity : ComponentActivity() {
 
                 if (state.isRunning) {
                     chordGroup.visibility = View.VISIBLE
-                    keySpinner.visibility = View.GONE
+                    keyDropdown.visibility = View.GONE
                     startStopButton.setText(R.string.stop_button)
                     wholeLayout.keepScreenOn = true
                 } else {
                     chordGroup.visibility = View.GONE
-                    keySpinner.visibility = View.VISIBLE
+                    keyDropdown.visibility = View.VISIBLE
                     startStopButton.setText(R.string.start_button)
                     wholeLayout.keepScreenOn = false
                 }
+
+                startStopButton.isEnabled = if(state.key == "") false else true
 
                 currentChordText.text =
                     if (state.countUp) (4 - state.beatNumber).toString()
@@ -99,19 +109,10 @@ class MainActivity : ComponentActivity() {
             override fun onStopTrackingTouch(sb: SeekBar?) {}
         })
 
-        keySpinner.onItemSelectedListener =
-            object : AdapterView.OnItemSelectedListener {
-                override fun onItemSelected(
-                    parent: AdapterView<*>?,
-                    view: View?,
-                    position: Int,
-                    id: Long
-                ) {
-                    val key = resources.getStringArray(R.array.keys_array)[position]
-                    viewModel.setKey(key)
-                }
-                override fun onNothingSelected(parent: AdapterView<*>?) {}
-            }
+        keyDropdown.setOnItemClickListener { _, _, position, _ ->
+            val key = resources.getStringArray(R.array.keys_array)[position]
+            viewModel.setKey(key)
+        }
 
         startStopButton.setOnClickListener {
             if (!viewModel.uiState.value.isRunning) {
