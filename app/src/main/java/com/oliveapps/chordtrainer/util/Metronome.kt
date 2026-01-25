@@ -1,32 +1,18 @@
 package com.oliveapps.chordtrainer.util
 
-class Metronome(
-    var bpm: Int = 80
-) {
-    var isRunning = false
+class Metronome {
     var beatNumber = 0
-    var countUp = false
-
-    fun nextBeat() {
-        beatNumber++
-        beatNumber %= 4
-        if (beatNumber == 0) countUp = false
-    }
-
-    fun intervalMs(): Long = 60000L / bpm
-
-    fun start() {
-        reset()
-        isRunning = true
-    }
-
-    fun stop() {
-        reset()
-        isRunning = false
-    }
+        private set
+    var countUp = true
+        private set
 
     fun reset() {
         beatNumber = 0
         countUp = true
+    }
+
+    fun advanceBeat() {
+        beatNumber = (beatNumber + 1) % 4
+        if(beatNumber == 0) countUp = false
     }
 }

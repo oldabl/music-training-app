@@ -1,9 +1,12 @@
 package com.oliveapps.chordtrainer.util
 
 class ChordManager {
+
     private var currentKeyChords = Array<String>(7) { "" }
-    private var nextChord = ""
-    private var currentChord = ""
+    var nextChord = ""
+        private set
+    var currentChord = ""
+        private set
 
     fun reset() {
         nextChord = ""
@@ -27,7 +30,7 @@ class ChordManager {
         return nextChord
     }
 
-    fun getRandomKeyChord(): String = currentKeyChords.random()
+    private fun getRandomKeyChord(): String = currentKeyChords.random()
 
     fun setKey(key: String) {
         // Find the right notes and make them double

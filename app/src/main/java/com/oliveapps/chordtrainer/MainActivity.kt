@@ -13,30 +13,28 @@ import android.widget.SeekBar
 import android.widget.Spinner
 import android.widget.TextView
 import androidx.activity.ComponentActivity
-import com.oliveapps.chordtrainer.util.ChordManager
-import com.oliveapps.chordtrainer.util.Metronome
-
+import androidx.activity.viewModels
+import androidx.lifecycle.lifecycleScope
+import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
 
-    // To handle the periodicity of the metronome
+    private val viewModel: MainViewModel by viewModels()
+
+    // Timing
     private lateinit var handler: Handler
     private lateinit var tickRunnable: Runnable
 
-    // To play the metronome tick
+    // Sound
     private lateinit var soundPool: SoundPool
-
-    // To manage the metronome attributes
-    private lateinit var metronome: Metronome
-
-    // To manage the chord logic
-    private lateinit var chordManager: ChordManager
+    private var tick1Sound = 0
+    private var tick234Sound = 0
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         setContentView(R.layout.activity_main)
 
-        // Get all view elements
+        // Views
         val wholeLayout = findViewById<LinearLayout>(R.id.wholeLayout)
         val chordGroup = findViewById<LinearLayout>(R.id.chordGroup)
         val currentChordText = findViewById<TextView>(R.id.currentChordText)
@@ -47,142 +45,140 @@ class MainActivity : ComponentActivity() {
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
 
-        // Initialise chord manager
-        chordManager = ChordManager()
-
-        // Initialise metronome
-        metronome = Metronome(resources.getInteger(R.integer.DEFAULT_BPM))
-
-        // Initialise metronome looper thread
+        // Helpers
         handler = Handler(Looper.getMainLooper())
+        viewModel.setBpm(resources.getInteger(R.integer.DEFAULT_BPM))
 
-        // Initialise metronome tick player
+        // Sounds
         soundPool = SoundPool.Builder().setMaxStreams(1).build()
-        val tick1Sound = soundPool.load(this, R.raw.tick_1, 1)
-        val tick234Sound = soundPool.load(this, R.raw.tick_234, 1)
+        tick1Sound = soundPool.load(this, R.raw.tick_1, 1)
+        tick234Sound = soundPool.load(this, R.raw.tick_234, 1)
 
-        // Initialise view elements
-        seekBar.progress = metronome.bpm
-        bpmText.text = metronome.bpm.toString()
-        bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(metronome.bpm))
-        bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(metronome.bpm))
-        startStopButton.setText(R.string.start_button)
+        // Pass ViewModel state to UI
+        lifecycleScope.launch {
+            viewModel.uiState.collect { state ->
 
-        // Handle changing the metronome bpm
+                startStopButton.setText(R.string.start_button)
+                seekBar.progress = state.bpm
+                bpmText.text = state.bpm.toString()
+                bpmText.setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    getBpmTextSize(state.bpm)
+                )
+                bpmTitleText.setTextSize(
+                    TypedValue.COMPLEX_UNIT_SP,
+                    getBpmTitleTextSize(state.bpm)
+                )
+
+                if (state.isRunning) {
+                    chordGroup.visibility = View.VISIBLE
+                    keySpinner.visibility = View.GONE
+                    startStopButton.setText(R.string.stop_button)
+                    wholeLayout.keepScreenOn = true
+                } else {
+                    chordGroup.visibility = View.GONE
+                    keySpinner.visibility = View.VISIBLE
+                    startStopButton.setText(R.string.start_button)
+                    wholeLayout.keepScreenOn = false
+                }
+
+                currentChordText.text =
+                    if (state.countUp) (4 - state.beatNumber).toString()
+                    else state.currentChord
+
+                nextChordText.text = state.nextChord
+            }
+        }
+
+        // Pass UI changes to ViewModel
         seekBar.setOnSeekBarChangeListener(object : SeekBar.OnSeekBarChangeListener {
             override fun onProgressChanged(sb: SeekBar?, progress: Int, fromUser: Boolean) {
-                metronome.bpm = progress
-                bpmText.text = metronome.bpm.toString()
-                bpmText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTextSize(metronome.bpm))
-                bpmTitleText.setTextSize(TypedValue.COMPLEX_UNIT_SP, getBpmTitleTextSize(metronome.bpm))
+                viewModel.setBpm(progress)
             }
             override fun onStartTrackingTouch(sb: SeekBar?) {}
             override fun onStopTrackingTouch(sb: SeekBar?) {}
         })
 
-        // Handle the metronome
+        keySpinner.onItemSelectedListener =
+            object : AdapterView.OnItemSelectedListener {
+                override fun onItemSelected(
+                    parent: AdapterView<*>?,
+                    view: View?,
+                    position: Int,
+                    id: Long
+                ) {
+                    val key = resources.getStringArray(R.array.keys_array)[position]
+                    viewModel.setKey(key)
+                }
+                override fun onNothingSelected(parent: AdapterView<*>?) {}
+            }
+
+        startStopButton.setOnClickListener {
+            if (!viewModel.uiState.value.isRunning) {
+                viewModel.start()
+                handler.post(tickRunnable)
+            } else {
+                viewModel.stop()
+                handler.removeCallbacks(tickRunnable)
+            }
+        }
+
+        // Metronome and chord loop
         tickRunnable = object : Runnable {
             override fun run() {
-                if (metronome.isRunning) {
-                    // Display background longer on first beat
-                    var metronomeClickDelay = resources.getInteger(R.integer.METRONOME_CLICK_DELAY).toLong()
-                    // If has been started just now
-                    if(metronome.countUp) {
-                        val countDown = 4 - metronome.beatNumber
-                        currentChordText.text = countDown.toString()
-                    }
-                    // If first beat, set next chord and UI colours
-                    if(metronome.beatNumber == 0) {
-                        if(!metronome.countUp)
-                            currentChordText.text = chordManager.goToNextChord()
-                        nextChordText.text = chordManager.findNextChord()
-                        metronomeClickDelay *= resources.getInteger(R.integer.METRONOME_CLICK_MULTIPLY_FIRST_BEAT)
-                        // Play metronome sound for first beat
+                if (viewModel.uiState.value.isRunning) {
+
+                    // Signal new beat to ViewModel
+                    viewModel.onBeat()
+
+                    // Get duration for changing background color on tick
+                    var clickDelay =
+                        resources.getInteger(R.integer.METRONOME_CLICK_DURATION).toLong()
+
+                    // Check which beat we're on to change sound and display
+                    val beatNumber = viewModel.uiState.value.beatNumber
+                    if (beatNumber == 0) {
+                        clickDelay *= resources.getInteger(
+                            R.integer.METRONOME_CLICK_DURATION_MULTIPLIER_FIRST_BEAT
+                        )
                         soundPool.play(tick1Sound, 1f, 1f, 1, 0, 1f)
                     } else {
-                        // Play metronome sound for 2nd 3rd and 4th beats
                         soundPool.play(tick234Sound, 1f, 1f, 1, 0, 1f)
                     }
-                    // Show visual beat
+
+                    // Switch background colour on tick
                     currentChordText.setBackgroundColor(getColor(R.color.teal_200))
                     handler.postDelayed({
-                        currentChordText.setBackgroundColor(getColor(android.R.color.transparent))
-                    }, metronomeClickDelay)
-                    // Plan the next beat
-                    handler.postDelayed(this, metronome.intervalMs())
-                    // Prepare next beat
-                    metronome.nextBeat()
+                        currentChordText.setBackgroundColor(
+                            getColor(android.R.color.transparent)
+                        )
+                    }, clickDelay)
+
+                    // Plan next beat
+                    handler.postDelayed(this, viewModel.intervalMs())
                 }
-            }
-        }
-
-        // Handle selection of key
-        keySpinner.onItemSelectedListener = object : AdapterView.OnItemSelectedListener {
-            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
-                val keySelected = resources.getStringArray(R.array.keys_array)[position]
-                chordManager.setKey(keySelected)
-            }
-            override fun onNothingSelected(parent: AdapterView<*>?) {}
-        }
-
-        // Handle the start and stop buttons
-        startStopButton.setOnClickListener {
-            if (!metronome.isRunning) {
-                // Start rhythm
-                startRhythm()
-                // Remove key selector and show stop button
-                keySpinner.visibility = View.GONE
-                startStopButton.setText(R.string.stop_button)
-                // Display chords to play
-                chordGroup.visibility = View.VISIBLE
-                // Keep screen on while running
-                wholeLayout.keepScreenOn = true
-            } else {
-                // Stop rhythm
-                stopRhythm()
-                // Remove chords to play
-                chordGroup.visibility = View.GONE
-                // Display key selector and show start button
-                keySpinner.visibility = View.VISIBLE
-                startStopButton.setText(R.string.start_button)
-                // Allow screen to turn off when stopping
-                wholeLayout.keepScreenOn = false
             }
         }
     }
 
-    // Handle leaving application
+    // App destroy handler
     override fun onDestroy() {
         soundPool.release()
         super.onDestroy()
     }
 
-    // Starts metronome and chord thread
-    fun startRhythm() {
-        chordManager.reset()
-        metronome.start()
-        handler.post(tickRunnable)
-    }
-
-    // Stops metronome and chord thread
-    fun stopRhythm() {
-        metronome.stop()
-        handler.removeCallbacks(tickRunnable)
-    }
-
-    // Get BPM text size
-    fun getBpmTextSize(bpm: Int): Float {
-        return resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE)+
-                (bpm.toFloat()-resources.getInteger(R.integer.MIN_BPM))*
-                (resources.getInteger(R.integer.MAX_BPM_TEXT_SIZE)-
-                        resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE))/
+    // UI helpers
+    private fun getBpmTextSize(bpm: Int): Float =
+        resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE) +
+                (bpm.toFloat() - resources.getInteger(R.integer.MIN_BPM)) *
+                (resources.getInteger(R.integer.MAX_BPM_TEXT_SIZE) -
+                        resources.getInteger(R.integer.MIN_BPM_TEXT_SIZE)) /
                 resources.getInteger(R.integer.MAX_BPM)
-    }
-    fun getBpmTitleTextSize(bpm: Int): Float {
-        return resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE)+
-                (bpm.toFloat()-resources.getInteger(R.integer.MIN_BPM))*
-                (resources.getInteger(R.integer.MAX_BPM_TITLE_TEXT_SIZE)-
-                        resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE))/
+
+    private fun getBpmTitleTextSize(bpm: Int): Float =
+        resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE) +
+                (bpm.toFloat() - resources.getInteger(R.integer.MIN_BPM)) *
+                (resources.getInteger(R.integer.MAX_BPM_TITLE_TEXT_SIZE) -
+                        resources.getInteger(R.integer.MIN_BPM_TITLE_TEXT_SIZE)) /
                 resources.getInteger(R.integer.MAX_BPM)
-    }
 }
