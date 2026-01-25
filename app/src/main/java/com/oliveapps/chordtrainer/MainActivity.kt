@@ -6,10 +6,15 @@ import android.os.Handler
 import android.os.Looper
 import android.util.TypedValue
 import android.view.View
-import android.widget.*
+import android.widget.AdapterView
+import android.widget.Button
+import android.widget.LinearLayout
+import android.widget.SeekBar
+import android.widget.Spinner
+import android.widget.TextView
 import androidx.activity.ComponentActivity
-import com.oliveapps.chordtrainer.util.Metronome
 import com.oliveapps.chordtrainer.util.ChordManager
+import com.oliveapps.chordtrainer.util.Metronome
 
 
 class MainActivity : ComponentActivity() {
@@ -127,7 +132,7 @@ class MainActivity : ComponentActivity() {
                 startRhythm()
                 // Remove key selector and show stop button
                 keySpinner.visibility = View.GONE
-                startStopButton.setText(R.string.stop_button);
+                startStopButton.setText(R.string.stop_button)
                 // Display chords to play
                 chordGroup.visibility = View.VISIBLE
                 // Keep screen on while running

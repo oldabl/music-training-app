@@ -1,10 +1,5 @@
 package com.oliveapps.chordtrainer.util
 
-import com.oliveapps.chordtrainer.util.Music
-import kotlin.collections.get
-import kotlin.collections.set
-import kotlin.inc
-
 class ChordManager {
     private var currentKeyChords = Array<String>(7) { "" }
     private var nextChord = ""

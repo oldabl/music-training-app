@@ -8,7 +8,6 @@
     android:fitsSystemWindows="true">
 
     <LinearLayout
-        android:id="@+id/keyAndChordGroup"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"
@@ -31,7 +30,6 @@
                 android:textColor="@color/teal_900"
                 android:text="@string/default_empty_text"/>
             <TextView
-                android:id="@+id/nextChordPreText"
                 android:layout_width="match_parent"
                 android:layout_height="0dp"
                 android:layout_weight="0.2"
@@ -64,7 +62,6 @@
     </LinearLayout>
 
     <LinearLayout
-        android:id="@+id/optionGroup"
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="1"

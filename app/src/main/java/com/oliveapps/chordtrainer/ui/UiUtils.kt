@@ -1,5 +1,3 @@
 package com.oliveapps.chordtrainer.ui
 
-object UiUtils {
-
-}
+object UiUtils
