@@ -92,6 +92,7 @@
             android:textSize="20sp"
             android:textAlignment="center"
             android:gravity="top"
+            android:textColor="@color/bpm"
             android:text="@string/bpm_text_title"/>
         <SeekBar
             android:id="@+id/bpmSeekBar"
