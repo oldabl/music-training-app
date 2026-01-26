@@ -13,7 +13,7 @@ data class UiState(
     val countUp: Boolean = false,
     val key: String = "",
     val currentChord: String = "",
-    val nextChord: String = "",
+    val nextChord: String = ""
 )
 
 class MainViewModel : ViewModel() {

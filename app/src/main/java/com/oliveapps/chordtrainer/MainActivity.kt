@@ -168,10 +168,15 @@ class MainActivity : ComponentActivity() {
         }
     }
 
-    // App destroy handler
+    // Other lifecycle handlers
     override fun onDestroy() {
         soundPool.release()
         super.onDestroy()
+    }
+    override fun onStop() {
+        viewModel.stop()
+        handler.removeCallbacks(tickRunnable)
+        super.onStop()
     }
 
     // UI helpers
