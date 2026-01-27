@@ -50,22 +50,36 @@
                 android:text="@string/default_empty_text"
                 android:layout_marginBottom="40dp"/>
         </LinearLayout>
-        <com.google.android.material.textfield.TextInputLayout
+        <LinearLayout
+            android:id="@+id/keySelectorLayout"
             android:layout_width="match_parent"
             android:layout_height="fill_parent"
-            android:layout_marginTop="30sp"
-            style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
-            <AutoCompleteTextView
-                android:id="@+id/keyDropdown"
+            android:orientation="vertical">
+            <ImageView
+                android:layout_width="wrap_content"
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                android:src="@mipmap/chord_trainer_logo_square"
+                android:contentDescription="@string/logo_image_description"
+                android:layout_marginTop="50dp"
+                android:layout_marginBottom="20dp"
+                />
+            <com.google.android.material.textfield.TextInputLayout
                 android:layout_width="match_parent"
-                android:layout_height="wrap_content"
-                android:inputType="none"
-                android:textSize="30sp"
-                android:cursorVisible="false"
-                android:focusable="false"
-                android:layout_gravity="center"
-                android:hint="@string/key_dropdown_hint"/>
-        </com.google.android.material.textfield.TextInputLayout>
+                android:layout_height="0dp"
+                android:layout_weight="1"
+                style="@style/Widget.Material3.TextInputLayout.OutlinedBox.ExposedDropdownMenu">
+                <AutoCompleteTextView
+                    android:id="@+id/keyDropdown"
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="none"
+                    android:textSize="30sp"
+                    android:cursorVisible="false"
+                    android:focusable="false"
+                    android:hint="@string/key_dropdown_hint"/>
+            </com.google.android.material.textfield.TextInputLayout>
+        </LinearLayout>
     </LinearLayout>
 
     <LinearLayout

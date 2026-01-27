@@ -43,6 +43,7 @@ class MainActivity : ComponentActivity() {
         val bpmTitleText = findViewById<TextView>(R.id.bpmTitleText)
         val seekBar = findViewById<SeekBar>(R.id.bpmSeekBar)
         val startStopButton = findViewById<Button>(R.id.startStopButton)
+        val keySelectorLayout = findViewById<LinearLayout>(R.id.keySelectorLayout)
         // Key dropdown selector
         val keyDropdown = findViewById<AutoCompleteTextView>(R.id.keyDropdown)
         val adapter = ArrayAdapter(
@@ -80,12 +81,12 @@ class MainActivity : ComponentActivity() {
 
                 if (state.isRunning) {
                     chordGroup.visibility = View.VISIBLE
-                    keyDropdown.visibility = View.GONE
+                    keySelectorLayout.visibility = View.GONE
                     startStopButton.setText(R.string.stop_button)
                     wholeLayout.keepScreenOn = true
                 } else {
                     chordGroup.visibility = View.GONE
-                    keyDropdown.visibility = View.VISIBLE
+                    keySelectorLayout.visibility = View.VISIBLE
                     startStopButton.setText(R.string.start_button)
                     wholeLayout.keepScreenOn = false
                 }

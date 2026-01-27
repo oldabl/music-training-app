@@ -6,6 +6,7 @@
     <string name="bpm_text_title">BPM</string>
     <string name="next_chord_title">NEXT CHORD</string>
     <string name="key_dropdown_hint">Key</string>
+    <string name="logo_image_description">Chord Trainer logo</string>
     <string name="notes_C">C</string>
     <string name="notes_D">D</string>
     <string name="notes_E">E</string>
