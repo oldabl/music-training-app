@@ -3,6 +3,7 @@ package com.oliveapps.chordtrainer
 import androidx.lifecycle.ViewModel
 import com.oliveapps.chordtrainer.util.ChordManager
 import com.oliveapps.chordtrainer.util.Metronome
+import com.oliveapps.chordtrainer.util.Music
 import kotlinx.coroutines.flow.MutableStateFlow
 import kotlinx.coroutines.flow.StateFlow
 
@@ -20,6 +21,7 @@ class MainViewModel : ViewModel() {
 
     private val chordManager = ChordManager()
     private val metronome = Metronome()
+    private val music = Music()
 
     private val _uiState = MutableStateFlow(UiState())
     val uiState: StateFlow<UiState> = _uiState
@@ -42,8 +44,8 @@ class MainViewModel : ViewModel() {
             isRunning = true,
             beatNumber = metronome.beatNumber,
             countUp = metronome.countUp,
-            currentChord = chordManager.currentChord,
-            nextChord = chordManager.nextChord
+            currentChord = music.getLocaleChordName(chordManager.currentChord),
+            nextChord = music.getLocaleChordName(chordManager.nextChord)
         )
     }
 
@@ -62,10 +64,13 @@ class MainViewModel : ViewModel() {
         _uiState.value = state.copy(
             beatNumber = metronome.beatNumber,
             countUp = metronome.countUp,
-            currentChord = chordManager.currentChord,
-            nextChord = chordManager.nextChord
+            currentChord = music.getLocaleChordName(chordManager.currentChord),
+            nextChord = music.getLocaleChordName(chordManager.nextChord)
         )
 
         metronome.advanceBeat()
     }
+
+    fun getKey(position: Int) = Music.getKey(position)
+    fun getMusicKeys(notes: Map<String, String>) = music.getMusicKeys(notes)
 }

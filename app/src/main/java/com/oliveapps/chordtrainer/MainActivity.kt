@@ -15,7 +15,6 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
-import com.oliveapps.chordtrainer.util.Music
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -49,7 +48,7 @@ class MainActivity : ComponentActivity() {
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_1,
-            Music.getMusicKeys(makeNoteList())
+            viewModel.getMusicKeys(makeNoteList())
         )
         keyDropdown.setAdapter(adapter)
         keyDropdown.keyListener = null
@@ -117,7 +116,7 @@ class MainActivity : ComponentActivity() {
         })
 
         keyDropdown.setOnItemClickListener { _, _, position, _ ->
-            viewModel.setKey(Music.getKey(position))
+            viewModel.setKey(viewModel.getKey(position))
         }
 
         startStopButton.setOnClickListener {
