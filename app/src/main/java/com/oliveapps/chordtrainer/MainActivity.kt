@@ -15,6 +15,7 @@ import android.widget.TextView
 import androidx.activity.ComponentActivity
 import androidx.activity.viewModels
 import androidx.lifecycle.lifecycleScope
+import com.oliveapps.chordtrainer.util.Music
 import kotlinx.coroutines.launch
 
 class MainActivity : ComponentActivity() {
@@ -48,7 +49,7 @@ class MainActivity : ComponentActivity() {
         val adapter = ArrayAdapter(
             this,
             android.R.layout.simple_list_item_1,
-            resources.getStringArray(R.array.keys_array)
+            Music.getMusicKeys(makeNoteList())
         )
         keyDropdown.setAdapter(adapter)
         keyDropdown.keyListener = null
@@ -116,8 +117,7 @@ class MainActivity : ComponentActivity() {
         })
 
         keyDropdown.setOnItemClickListener { _, _, position, _ ->
-            val key = resources.getStringArray(R.array.keys_array)[position]
-            viewModel.setKey(key)
+            viewModel.setKey(Music.getKey(position))
         }
 
         startStopButton.setOnClickListener {
@@ -177,6 +177,19 @@ class MainActivity : ComponentActivity() {
         viewModel.stop()
         handler.removeCallbacks(tickRunnable)
         super.onStop()
+    }
+
+    // Make a List<String> from string notes
+    private fun makeNoteList(): Map<String, String> {
+        return mapOf<String, String>(
+            "C" to resources.getString(R.string.notes_C),
+            "D" to resources.getString(R.string.notes_D),
+            "E" to resources.getString(R.string.notes_E),
+            "F" to resources.getString(R.string.notes_F),
+            "G" to resources.getString(R.string.notes_G),
+            "A" to resources.getString(R.string.notes_A),
+            "B" to resources.getString(R.string.notes_B),
+        )
     }
 
     // UI helpers

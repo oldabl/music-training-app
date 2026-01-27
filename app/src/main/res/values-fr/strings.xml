@@ -1,0 +1,16 @@
+<?xml version="1.0" encoding="utf-8"?>
+<resources>
+    <string name="app_name">Chord Trainer</string>
+    <string name="start_button">Démarrer</string>
+    <string name="stop_button">Arrêter</string>
+    <string name="bpm_text_title">BPM</string>
+    <string name="next_chord_title">Prochain accord</string>
+    <string name="key_dropdown_hint">Clé</string>
+    <string name="notes_C">Do</string>
+    <string name="notes_D">Ré</string>
+    <string name="notes_E">Mi</string>
+    <string name="notes_F">Fa</string>
+    <string name="notes_G">Sol</string>
+    <string name="notes_A">La</string>
+    <string name="notes_B">Si</string>
+</resources>

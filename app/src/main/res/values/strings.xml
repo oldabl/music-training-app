@@ -6,18 +6,11 @@
     <string name="bpm_text_title">BPM</string>
     <string name="next_chord_title">NEXT CHORD</string>
     <string name="key_dropdown_hint">Key</string>
-    <string-array name="keys_array">
-        <item>C</item>
-        <item>Db</item>
-        <item>D</item>
-        <item>Eb</item>
-        <item>E</item>
-        <item>F</item>
-        <item>Gb</item>
-        <item>G</item>
-        <item>Ab</item>
-        <item>A</item>
-        <item>Bb</item>
-        <item>B</item>
-    </string-array>
+    <string name="notes_C">C</string>
+    <string name="notes_D">D</string>
+    <string name="notes_E">E</string>
+    <string name="notes_F">F</string>
+    <string name="notes_G">G</string>
+    <string name="notes_A">A</string>
+    <string name="notes_B">B</string>
 </resources>
